@@ -74,10 +74,19 @@
       messages.innerHTML += `<div class="message user">${text}</div>`;
       input.value = '';
 
-      setTimeout(() => {
-        messages.innerHTML += `<div class="message bot">Te leo.</div>`;
-        messages.scrollTop = messages.scrollHeight;
-      }, 500);
+      fetch('/api/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ message: text })
+})
+.then(res => res.json())
+.then(data => {
+  messages.innerHTML += `<div class="message bot">${data.reply}</div>`;
+  messages.scrollTop = messages.scrollHeight;
+})
+.catch(() => {
+  messages.innerHTML += `<div class="message bot">Estoy acá. Probá de nuevo.</div>`;
+});
     }
   </script>
 
