@@ -3,8 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <title>No estás solo</title>
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #e5e5e5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat {
+      width: 100%;
+      max-width: 400px;
+    }
+    .messages {
+      background: #111;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .user {
+      text-align: right;
+      color: #fff;
+    }
+    .bot {
+      text-align: left;
+      color: #aaa;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: none;
+      background: #fff;
+      color: #000;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body style="background:#0b0b0b;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;">
-  <h1>La página ya está viva</h1>
+<body>
+
+  <div class="chat">
+    <div class="messages" id="messages">
+      <div class="message bot">Estoy acá. Escribí lo que tengas.</div>
+    </div>
+    <input id="input" placeholder="Escribí acá..." />
+    <button onclick="sendMessage()">Hablar</button>
+  </div>
+
+  <script>
+    function sendMessage() {
+      const input = document.getElementById('input');
+      const messages = document.getElementById('messages');
+      const text = input.value.trim();
+      if (!text) return;
+
+      messages.innerHTML += `<div class="message user">${text}</div>`;
+      input.value = '';
+
+      setTimeout(() => {
+        messages.innerHTML += `<div class="message bot">Te leo.</div>`;
+        messages.scrollTop = messages.scrollHeight;
+      }, 500);
+    }
+  </script>
+
 </body>
 </html>
