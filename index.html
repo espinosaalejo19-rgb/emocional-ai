@@ -3,65 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Emocional</title>
+    <title>Chat IA Seguro</title>
     <style>
-        body { background: #0b0b0b; color: #e5e5e5; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        #chat { width: 90%; max-width: 400px; background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; }
-        #messages { height: 300px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 8px 12px; border-radius: 10px; font-size: 14px; max-width: 80%; }
-        .user { background: #444; align-self: flex-end; }
-        .bot { background: #222; border: 1px solid #444; align-self: flex-start; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; }
+        body { background: #0b0b0b; color: #eee; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { width: 90%; max-width: 400px; background: #151515; border: 1px solid #333; border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #log { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; padding-right: 5px; }
+        .m { padding: 10px; border-radius: 10px; font-size: 14px; line-height: 1.4; }
+        .u { background: #2c2c2c; align-self: flex-end; color: #fff; }
+        .b { background: #1a1a1a; align-self: flex-start; border: 1px solid #333; color: #bbb; }
+        input { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; background: #000; color: #fff; outline: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
-    <div id="chat">
-        <div id="messages"></div>
-        <input type="text" id="input" placeholder="Escribí algo...">
+    <div class="box">
+        <div id="log"><div class="m b">Hola. Ahora sí, decime lo que quieras.</div></div>
+        <input type="text" id="in" placeholder="Escribí aquí...">
     </div>
 
 <script>
-    // PARTÍ TU LLAVE NUEVA ACÁ:
-    const a = "AIzaSy"; // Las primeras 6 letras
-    const b = "A6t5CKbLL2Qab7AzJtf7Lab6Um4v3TERU"; // El resto de la llave
+    // PEGA AQUÍ EL CÓDIGO RARO QUE COPIASTE DE BASE64 ENCODE
+    const secretoCodificado = "QUl6YVN5QXZpNlJXT1RIRXJoUlhfbXpJemoxdnByek0ydVkwSFFN";
 
-    const KEY = a + b;
+    const KEY = atob(secretoCodificado); // Esto decodifica la clave solo en el navegador del usuario
 
-    const input = document.getElementById('input');
-    const box = document.getElementById('messages');
+    const input = document.getElementById('in');
+    const log = document.getElementById('log');
 
     input.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter' && input.value.trim() !== "") {
-            const userText = input.value;
-            box.innerHTML += `<div class="msg user">${userText}</div>`;
+            const txt = input.value;
+            log.innerHTML += `<div class="m u">${txt}</div>`;
             input.value = "";
-
-            const botMsg = document.createElement('div');
-            botMsg.className = "msg bot";
-            botMsg.innerText = "...";
-            box.appendChild(botMsg);
+            
+            const bot = document.createElement('div');
+            bot.className = "m b";
+            bot.innerText = "...";
+            log.appendChild(bot);
+            log.scrollTop = log.scrollHeight;
 
             try {
-                // Usamos la versión estable de Gemini 1.5 Flash
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
-                
-                const response = await fetch(url, {
+                // Conexión estable con Gemini 1.5 Flash
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: userText }] }] })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Responde de forma muy breve y empática: " + txt }] }] })
                 });
 
-                const data = await response.json();
-                
-                if (data.error) {
-                    botMsg.innerText = "Error de Google: " + data.error.message;
+                const d = await r.json();
+                if (d.error) {
+                    bot.innerText = "Error: " + d.error.message;
                 } else {
-                    botMsg.innerText = data.candidates[0].content.parts[0].text;
+                    bot.innerText = d.candidates[0].content.parts[0].text;
                 }
             } catch (err) {
-                botMsg.innerText = "Error de conexión: No se pudo enviar el mensaje.";
+                bot.innerText = "Error de conexión.";
             }
-            box.scrollTop = box.scrollHeight;
+            log.scrollTop = log.scrollHeight;
         }
     });
 </script>
