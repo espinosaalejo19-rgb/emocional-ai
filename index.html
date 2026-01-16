@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>No estás solo – Un lugar para hablar</title>
   <meta name="description" content="No estás solo. Un espacio seguro para hablar, desahogarte y sentirte acompañado, sin juicios.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       background: #0b0b0b;
@@ -15,9 +16,15 @@
       height: 100vh;
       margin: 0;
     }
-    .chat {
+    .container {
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-weight: normal;
     }
     .messages {
       background: #111;
@@ -25,13 +32,17 @@
       height: 300px;
       overflow-y: auto;
       margin-bottom: 10px;
+      text-align: left;
+      border-radius: 8px;
     }
     .message {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      line-height: 1.4;
     }
     .user {
       text-align: right;
       color: #fff;
+      font-weight: bold;
     }
     .bot {
       text-align: left;
@@ -39,29 +50,40 @@
     }
     input {
       width: 100%;
-      padding: 10px;
-      border: none;
+      padding: 12px;
+      border: 1px solid #333;
       background: #1a1a1a;
       color: #fff;
+      box-sizing: border-box;
+      border-radius: 4px;
+      outline: none;
     }
     button {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
+      padding: 12px;
+      margin-top: 8px;
       border: none;
       background: #fff;
       color: #000;
       cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #ddd;
     }
   </style>
 </head>
 <body>
 
-  <div class="chat">
+  <div class="container">
+    <h1>No estás solo</h1>
+
     <div class="messages" id="messages">
-      <div class="message bot">Estoy acá. Escribí lo que tengas.</div>
+      <div class="message bot">Estoy acá. Podés escribir lo que quieras.</div>
     </div>
-    <input id="input" placeholder="Escribí acá..." />
+
+    <input id="input" placeholder="Escribí acá..." autocomplete="off" />
     <button onclick="sendMessage()">Hablar</button>
   </div>
 
@@ -70,17 +92,23 @@
       const input = document.getElementById('input');
       const messages = document.getElementById('messages');
       const text = input.value.trim();
+      
       if (!text) return;
 
+      // Mostrar mensaje del usuario
       messages.innerHTML += `<div class="message user">${text}</div>`;
       input.value = '';
+      
+      // Auto-scroll al fondo
+      messages.scrollTop = messages.scrollHeight;
 
       const reply = generateResponse(text);
 
+      // Simular que el bot está "pensando"
       setTimeout(() => {
         messages.innerHTML += `<div class="message bot">${reply}</div>`;
         messages.scrollTop = messages.scrollHeight;
-      }, 600);
+      }, 800);
     }
 
     function generateResponse(text) {
@@ -89,21 +117,24 @@
       if (msg.includes("solo") || msg.includes("soledad")) {
         return "No estás solo. A veces decirlo ya es un primer alivio. Estoy acá con vos.";
       }
-
       if (msg.includes("cansado") || msg.includes("agotado")) {
-        return "Tiene sentido sentirse cansado. No siempre es físico, a veces es todo junto.";
+        return "Tiene sentido sentirse cansado. A veces no es el cuerpo, es todo junto.";
       }
-
       if (msg.includes("triste") || msg.includes("mal")) {
-        return "Gracias por decirlo. No hace falta estar bien todo el tiempo. ¿Querés contarme más?";
+        return "Gracias por decirlo. No hace falta estar bien todo el tiempo. Te escucho.";
       }
-
-      if (msg.includes("no sé") || msg.includes("confundido")) {
-        return "Está bien no tener todo claro ahora. A veces solo ponerlo en palabras ayuda.";
+      if (msg.includes("confundido") || msg.includes("no sé")) {
+        return "Está bien no tener todo claro ahora. Podemos ir de a poco.";
       }
-
       return "Te leo. Decime lo que tengas, sin apuro.";
     }
+
+    // Escuchar la tecla Enter
+    document.getElementById('input').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
   </script>
 
 </body>
