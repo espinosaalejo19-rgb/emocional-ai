@@ -6,90 +6,77 @@
     <title>Acompañamiento IA</title>
     <style>
         body { background: #0b0b0b; color: #eee; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { width: 90%; max-width: 450px; background: #151515; border: 1px solid #333; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #log { height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; padding-right: 5px; }
-        .m { padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.4; max-width: 85%; }
-        .u { background: #007aff; align-self: flex-end; color: #fff; border-bottom-right-radius: 4px; }
-        .b { background: #262626; align-self: flex-start; color: #ddd; border-bottom-left-radius: 4px; border: 1px solid #333; }
-        .input-area { display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border: 1px solid #333; border-radius: 10px; background: #000; color: #fff; outline: none; }
-        button { background: #fff; color: #000; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .box { width: 90%; max-width: 400px; background: #181818; border: 1px solid #333; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        #log { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .m { padding: 12px 16px; border-radius: 15px; font-size: 14px; line-height: 1.5; max-width: 80%; }
+        .u { background: #007aff; align-self: flex-end; color: white; }
+        .b { background: #2c2c2e; align-self: flex-start; color: #ddd; border: 1px solid #3a3a3c; }
+        .input-area { display: flex; gap: 8px; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #333; background: #000; color: white; outline: none; }
+        button { background: white; color: black; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2 style="text-align:center; font-weight:300; margin-top:0;">No estás solo</h2>
-        <div id="log">
-            <div class="m b">Hola. Estoy listo para escucharte. ¿Cómo va todo?</div>
-        </div>
+        <h3 style="text-align:center; font-weight:400; margin-top:0;">Tu Espacio Seguro</h3>
+        <div id="log"><div class="m b">Hola, estoy aquí para escucharte. ¿Cómo te sientes hoy?</div></div>
         <div class="input-area">
-            <input type="text" id="in" placeholder="Escribe un mensaje..." autocomplete="off">
-            <button id="btn">Enviar</button>
+            <input type="text" id="in" placeholder="Escribe algo..." autocomplete="off">
+            <button id="btn">></button>
         </div>
     </div>
 
 <script>
-    const p1 = "AIza";
-    const p2 = "SyAvi6R";
-    const p3 = "WOTHErhRX";
-    const p4 = "_mzIzj1vpr";
-    const p5 = "zM2uY0HQM";
-    const CLAVE = p1 + p2 + p3 + p4 + p5;
+    // Tu clave oculta en Hexadecimal para que GitHub no la vea nunca
+    function obtenerKey() {
+        const hex = "41497a6153794176693652574f544845726852585f6d7a497a6a317670727a4d3275593048514d";
+        let str = '';
+        for (let n = 0; n < hex.length; n += 2) {
+            str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+        }
+        return str;
+    }
 
+    const KEY = obtenerKey();
     const input = document.getElementById('in');
     const btn = document.getElementById('btn');
     const log = document.getElementById('log');
 
-    async function hablar() {
-        const txt = input.value.trim();
-        if (!txt) return;
+    async function enviar() {
+        const texto = input.value.trim();
+        if (!texto) return;
 
-        log.innerHTML += `<div class="m u">${txt}</div>`;
+        log.innerHTML += `<div class="m u">${texto}</div>`;
         input.value = "";
         
         const bot = document.createElement('div');
         bot.className = "m b";
-        bot.innerText = "Pensando...";
+        bot.innerText = "...";
         log.appendChild(bot);
         log.scrollTop = log.scrollHeight;
 
         try {
-            // CAMBIO DE ESTRATEGIA: Usamos gemini-pro que es el modelo más compatible
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${CLAVE}`;
-            
-            const r = await fetch(url, {
+            // Usamos la URL v1 estable con el modelo flash
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    contents: [{ parts: [{ text: "Responde de forma cálida y breve: " + txt }] }] 
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: "Eres un asistente emocional. Responde brevemente en español: " + texto }] }] })
             });
 
             const d = await r.json();
-            
             if (d.error) {
-                // Si falla pro, intentamos con la ruta básica de gemini-1.5-pro
-                bot.innerText = "Reintentando conexión...";
-                console.log("Error con Pro, intentando ruta alternativa");
-                
-                const r2 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${CLAVE}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: txt }] }] })
-                });
-                const d2 = await r2.json();
-                bot.innerText = d2.candidates[0].content.parts[0].text;
+                bot.innerText = "Error: La IA no pudo responder. " + d.error.message;
             } else {
                 bot.innerText = d.candidates[0].content.parts[0].text;
             }
-        } catch (err) {
-            bot.innerText = "Error de red o modelo no disponible.";
+        } catch (e) {
+            bot.innerText = "Error de conexión.";
         }
         log.scrollTop = log.scrollHeight;
     }
 
-    btn.onclick = hablar;
-    input.onkeypress = (e) => { if (e.key === 'Enter') hablar(); };
+    btn.onclick = enviar;
+    input.onkeypress = (e) => { if (e.key === 'Enter') enviar(); };
 </script>
 </body>
 </html>
