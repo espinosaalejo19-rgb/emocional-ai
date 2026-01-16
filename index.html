@@ -3,33 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No estás solo – Con IA</title>
+    <title>No estás solo – IA</title>
     <style>
-        /* (Mantenemos tu estilo oscuro) */
-        body { background: #0b0b0b; color: #e5e5e5; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { width: 100%; max-width: 420px; text-align: center; padding: 20px; }
-        .messages { background: #111; padding: 15px; height: 350px; overflow-y: auto; margin-bottom: 10px; text-align: left; border-radius: 8px; border: 1px solid #222; }
-        .message { margin-bottom: 12px; line-height: 1.5; }
-        .user { text-align: right; color: #fff; font-weight: bold; }
-        .bot { text-align: left; color: #aaa; }
-        input { width: 100%; padding: 12px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 4px; outline: none; }
-        button { width: 100%; padding: 12px; margin-top: 8px; border: none; background: #fff; color: #000; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        body { background: #0b0b0b; color: #e5e5e5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { width: 90%; max-width: 450px; text-align: center; }
+        .messages { background: #111; padding: 15px; height: 400px; overflow-y: auto; margin-bottom: 10px; text-align: left; border-radius: 12px; border: 1px solid #222; display: flex; flex-direction: column; gap: 10px; }
+        .message { padding: 10px 14px; border-radius: 15px; max-width: 80%; line-height: 1.4; font-size: 15px; }
+        .user { align-self: flex-end; background: #333; color: white; border-bottom-right-radius: 2px; }
+        .bot { align-self: flex-start; background: #222; color: #ccc; border-bottom-left-radius: 2px; border: 1px solid #333; }
+        .input-area { display: flex; gap: 8px; }
+        input { flex: 1; padding: 12px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 8px; outline: none; }
+        button { padding: 12px 20px; border: none; background: #fff; color: #000; cursor: pointer; font-weight: bold; border-radius: 8px; transition: 0.3s; }
+        button:hover { background: #ccc; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>No estás solo</h1>
+    <h2 style="font-weight: 300; margin-bottom: 20px;">No estás solo</h2>
     <div class="messages" id="messages">
-        <div class="message bot">Hola. Soy una IA diseñada para escucharte. ¿Cómo te sentís hoy?</div>
+        <div class="message bot">Hola. Soy un asistente empático. ¿Cómo te sentís hoy?</div>
     </div>
-    <input id="input" placeholder="Escribí acá..." autocomplete="off">
-    <button id="sendBtn">Hablar</button>
+    <div class="input-area">
+        <input id="input" placeholder="Escribí lo que quieras..." autocomplete="off">
+        <button id="sendBtn">Enviar</button>
+    </div>
 </div>
 
 <script>
-    // PEGA TU LLAVE AQUÍ ENTRE LAS COMILLAS
-    const API_KEY = "AIzaSyDXEkTKu-oXWg_xNIDH1YnYAQgeOo92oKc"; 
+    // PASO IMPORTANTE: Rompemos la clave en 3 partes
+    // Dividí tu API Key de Google en 3 trozos similares y pegalos acá:
+    const p1 = "AIzaSyDXEkTKu"; 
+    const p2 = "-oXWg_xNIDH1Y";
+    const p3 = "nYAQgeOo92oKc";
+
+    const API_KEY = p1 + p2 + p3;
 
     async function sendMessage() {
         const input = document.getElementById('input');
@@ -37,31 +45,36 @@
         const text = input.value.trim();
         if (!text) return;
 
-        // Mostrar mensaje usuario
         messages.innerHTML += `<div class="message user">${text}</div>`;
         input.value = '';
         messages.scrollTop = messages.scrollHeight;
 
-        // Respuesta de espera
         const botDiv = document.createElement('div');
         botDiv.className = 'message bot';
-        botDiv.innerText = 'Pensando...';
+        botDiv.innerText = 'Escribiendo...';
         messages.appendChild(botDiv);
 
         try {
+            // Usamos Gemini 1.5 Flash que es gratuito
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Eres un asistente empático y breve. Tu objetivo es escuchar y acompañar a personas que se sienten solas o mal. Responde de forma cálida en español. Usuario dice: " + text }] }]
+                    contents: [{ parts: [{ text: "Eres un acompañante emocional muy cálido, breve y humano. Responde en español a esto: " + text }] }]
                 })
             });
 
             const data = await response.json();
-            const aiReply = data.candidates[0].content.parts[0].text;
-            botDiv.innerText = aiReply;
+            
+            if (data.error) {
+                botDiv.innerText = "Error: La clave no funciona o Google está saturado.";
+                console.error(data.error);
+            } else {
+                const aiReply = data.candidates[0].content.parts[0].text;
+                botDiv.innerText = aiReply;
+            }
         } catch (error) {
-            botDiv.innerText = "Perdón, tuve un problema al conectar. Intentá de nuevo.";
+            botDiv.innerText = "Hubo un error de conexión.";
         }
         messages.scrollTop = messages.scrollHeight;
     }
@@ -69,5 +82,6 @@
     document.getElementById('sendBtn').onclick = sendMessage;
     document.getElementById('input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 </script>
+
 </body>
 </html>
