@@ -19,7 +19,7 @@
 <body>
     <div class="box">
         <h3 style="text-align:center; font-weight:400; margin-top:0;">Tu Espacio Seguro</h3>
-        <div id="log"><div class="m b">Hola, estoy aquí para escucharte. ¿Cómo te sientes hoy?</div></div>
+        <div id="log"><div class="m b">Hola, estoy listo. ¿De qué quieres hablar?</div></div>
         <div class="input-area">
             <input type="text" id="in" placeholder="Escribe algo..." autocomplete="off">
             <button id="btn">></button>
@@ -27,7 +27,7 @@
     </div>
 
 <script>
-    // Tu clave oculta en Hexadecimal para que GitHub no la vea nunca
+    // Tu clave oculta en Hexadecimal
     function obtenerKey() {
         const hex = "41497a6153794176693652574f544845726852585f6d7a497a6a317670727a4d3275593048514d";
         let str = '';
@@ -56,18 +56,25 @@
         log.scrollTop = log.scrollHeight;
 
         try {
-            // Usamos la URL v1 estable con el modelo flash
-            const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
+            // URL CORREGIDA: v1beta y modelo flash sin sufijos extra
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+            
+            const r = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: "Eres un asistente emocional. Responde brevemente en español: " + texto }] }] })
+                body: JSON.stringify({ 
+                    contents: [{ parts: [{ text: "Responde de forma cálida y humana: " + texto }] }] 
+                })
             });
 
             const d = await r.json();
+            
             if (d.error) {
-                bot.innerText = "Error: La IA no pudo responder. " + d.error.message;
-            } else {
+                bot.innerText = "Error: " + d.error.message;
+            } else if (d.candidates && d.candidates[0].content) {
                 bot.innerText = d.candidates[0].content.parts[0].text;
+            } else {
+                bot.innerText = "La IA no pudo procesar la respuesta.";
             }
         } catch (e) {
             bot.innerText = "Error de conexión.";
