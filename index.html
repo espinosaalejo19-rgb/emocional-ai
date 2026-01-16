@@ -1,6 +1,109 @@
-const reply = generateResponse(text);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>No estás solo</title>
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #e5e5e5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat {
+      width: 100%;
+      max-width: 400px;
+    }
+    .messages {
+      background: #111;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .user {
+      text-align: right;
+      color: #fff;
+    }
+    .bot {
+      text-align: left;
+      color: #aaa;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: none;
+      background: #fff;
+      color: #000;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
 
-setTimeout(() => {
-  messages.innerHTML += `<div class="message bot">${reply}</div>`;
-  messages.scrollTop = messages.scrollHeight;
-}, 600);
+  <div class="chat">
+    <div class="messages" id="messages">
+      <div class="message bot">Estoy acá. Escribí lo que tengas.</div>
+    </div>
+    <input id="input" placeholder="Escribí acá..." />
+    <button onclick="sendMessage()">Hablar</button>
+  </div>
+
+  <script>
+    function sendMessage() {
+      const input = document.getElementById('input');
+      const messages = document.getElementById('messages');
+      const text = input.value.trim();
+      if (!text) return;
+
+      messages.innerHTML += `<div class="message user">${text}</div>`;
+      input.value = '';
+
+      const reply = generateResponse(text);
+
+      setTimeout(() => {
+        messages.innerHTML += `<div class="message bot">${reply}</div>`;
+        messages.scrollTop = messages.scrollHeight;
+      }, 600);
+    }
+
+    function generateResponse(text) {
+      const msg = text.toLowerCase();
+
+      if (msg.includes("solo") || msg.includes("soledad")) {
+        return "No estás solo. A veces decirlo ya es un primer alivio. Estoy acá con vos.";
+      }
+
+      if (msg.includes("cansado") || msg.includes("agotado")) {
+        return "Tiene sentido sentirse cansado. No siempre es físico, a veces es todo junto.";
+      }
+
+      if (msg.includes("triste") || msg.includes("mal")) {
+        return "Gracias por decirlo. No hace falta estar bien todo el tiempo. ¿Querés contarme más?";
+      }
+
+      if (msg.includes("no sé") || msg.includes("confundido")) {
+        return "Está bien no tener todo claro ahora. A veces solo ponerlo en palabras ayuda.";
+      }
+
+      return "Te leo. Decime lo que tengas, sin apuro.";
+    }
+  </script>
+
+</body>
+</html>
