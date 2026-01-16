@@ -1,141 +1,73 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>No estás solo – Un lugar para hablar</title>
-  <meta name="description" content="No estás solo. Un espacio seguro para hablar, desahogarte y sentirte acompañado, sin juicios.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background: #0b0b0b;
-      color: #e5e5e5;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      margin-bottom: 20px;
-      font-weight: normal;
-    }
-    .messages {
-      background: #111;
-      padding: 15px;
-      height: 300px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-      text-align: left;
-      border-radius: 8px;
-    }
-    .message {
-      margin-bottom: 12px;
-      line-height: 1.4;
-    }
-    .user {
-      text-align: right;
-      color: #fff;
-      font-weight: bold;
-    }
-    .bot {
-      text-align: left;
-      color: #aaa;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #333;
-      background: #1a1a1a;
-      color: #fff;
-      box-sizing: border-box;
-      border-radius: 4px;
-      outline: none;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border: none;
-      background: #fff;
-      color: #000;
-      cursor: pointer;
-      font-weight: bold;
-      border-radius: 4px;
-    }
-    button:hover {
-      background: #ddd;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No estás solo – Con IA</title>
+    <style>
+        /* (Mantenemos tu estilo oscuro) */
+        body { background: #0b0b0b; color: #e5e5e5; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { width: 100%; max-width: 420px; text-align: center; padding: 20px; }
+        .messages { background: #111; padding: 15px; height: 350px; overflow-y: auto; margin-bottom: 10px; text-align: left; border-radius: 8px; border: 1px solid #222; }
+        .message { margin-bottom: 12px; line-height: 1.5; }
+        .user { text-align: right; color: #fff; font-weight: bold; }
+        .bot { text-align: left; color: #aaa; }
+        input { width: 100%; padding: 12px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 4px; outline: none; }
+        button { width: 100%; padding: 12px; margin-top: 8px; border: none; background: #fff; color: #000; cursor: pointer; font-weight: bold; border-radius: 4px; }
+    </style>
 </head>
 <body>
 
-  <div class="container">
+<div class="container">
     <h1>No estás solo</h1>
-
     <div class="messages" id="messages">
-      <div class="message bot">Estoy acá. Podés escribir lo que quieras.</div>
+        <div class="message bot">Hola. Soy una IA diseñada para escucharte. ¿Cómo te sentís hoy?</div>
     </div>
+    <input id="input" placeholder="Escribí acá..." autocomplete="off">
+    <button id="sendBtn">Hablar</button>
+</div>
 
-    <input id="input" placeholder="Escribí acá..." autocomplete="off" />
-    <button onclick="sendMessage()">Hablar</button>
-  </div>
+<script>
+    // PEGA TU LLAVE AQUÍ ENTRE LAS COMILLAS
+    const API_KEY = "AIzaSyDXEkTKu-oXWg_xNIDH1YnYAQgeOo92oKc"; 
 
-  <script>
-    function sendMessage() {
-      const input = document.getElementById('input');
-      const messages = document.getElementById('messages');
-      const text = input.value.trim();
-      
-      if (!text) return;
+    async function sendMessage() {
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        const text = input.value.trim();
+        if (!text) return;
 
-      // Mostrar mensaje del usuario
-      messages.innerHTML += `<div class="message user">${text}</div>`;
-      input.value = '';
-      
-      // Auto-scroll al fondo
-      messages.scrollTop = messages.scrollHeight;
-
-      const reply = generateResponse(text);
-
-      // Simular que el bot está "pensando"
-      setTimeout(() => {
-        messages.innerHTML += `<div class="message bot">${reply}</div>`;
+        // Mostrar mensaje usuario
+        messages.innerHTML += `<div class="message user">${text}</div>`;
+        input.value = '';
         messages.scrollTop = messages.scrollHeight;
-      }, 800);
+
+        // Respuesta de espera
+        const botDiv = document.createElement('div');
+        botDiv.className = 'message bot';
+        botDiv.innerText = 'Pensando...';
+        messages.appendChild(botDiv);
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Eres un asistente empático y breve. Tu objetivo es escuchar y acompañar a personas que se sienten solas o mal. Responde de forma cálida en español. Usuario dice: " + text }] }]
+                })
+            });
+
+            const data = await response.json();
+            const aiReply = data.candidates[0].content.parts[0].text;
+            botDiv.innerText = aiReply;
+        } catch (error) {
+            botDiv.innerText = "Perdón, tuve un problema al conectar. Intentá de nuevo.";
+        }
+        messages.scrollTop = messages.scrollHeight;
     }
 
-    function generateResponse(text) {
-      const msg = text.toLowerCase();
-
-      if (msg.includes("solo") || msg.includes("soledad")) {
-        return "No estás solo. A veces decirlo ya es un primer alivio. Estoy acá con vos.";
-      }
-      if (msg.includes("cansado") || msg.includes("agotado")) {
-        return "Tiene sentido sentirse cansado. A veces no es el cuerpo, es todo junto.";
-      }
-      if (msg.includes("triste") || msg.includes("mal")) {
-        return "Gracias por decirlo. No hace falta estar bien todo el tiempo. Te escucho.";
-      }
-      if (msg.includes("confundido") || msg.includes("no sé")) {
-        return "Está bien no tener todo claro ahora. Podemos ir de a poco.";
-      }
-      return "Te leo. Decime lo que tengas, sin apuro.";
-    }
-
-    // Escuchar la tecla Enter
-    document.getElementById('input').addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
-  </script>
-
+    document.getElementById('sendBtn').onclick = sendMessage;
+    document.getElementById('input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+</script>
 </body>
 </html>
