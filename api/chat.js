@@ -1,13 +1,3 @@
-import OpenAI from "openai";
-
-export const config = {
-  runtime: "nodejs"
-};
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ reply: "Método no permitido" });
@@ -16,27 +6,35 @@ export default async function handler(req, res) {
   try {
     const { message } = req.body;
 
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Sos una presencia empática, humana y calmada. Respondés en español argentino, con pocas palabras, sin juzgar."
-        },
-        {
-          role: "user",
-          content: message
-        }
-      ]
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama3-8b-8192",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Sos una presencia empática, tranquila y humana. Respondés corto, sin juzgar, en español argentino."
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ]
+      })
     });
 
-    res.status(200).json({
-      reply: completion.choices[0].message.content
-    });
+    const data = await response.json();
+    const reply = data.choices[0].message.content;
+
+    res.status(200).json({ reply });
   } catch (err) {
     res.status(500).json({
-      reply: "Estoy acá con vos. ¿Querés contarme un poco más?"
+      reply: "Estoy acá con vos. Decime qué te pasa."
     });
   }
 }
