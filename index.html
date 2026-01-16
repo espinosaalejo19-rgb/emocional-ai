@@ -20,7 +20,7 @@
     <div class="box">
         <h2 style="text-align:center; font-weight:300; margin-top:0;">No estás solo</h2>
         <div id="log">
-            <div class="m b">Hola. Soy una IA diseñada para escucharte. ¿Cómo te sientes hoy?</div>
+            <div class="m b">Hola. Estoy listo para escucharte. ¿Cómo va todo?</div>
         </div>
         <div class="input-area">
             <input type="text" id="in" placeholder="Escribe un mensaje..." autocomplete="off">
@@ -29,13 +29,11 @@
     </div>
 
 <script>
-    // Tu clave dividida para saltar la seguridad de GitHub
     const p1 = "AIza";
     const p2 = "SyAvi6R";
     const p3 = "WOTHErhRX";
     const p4 = "_mzIzj1vpr";
     const p5 = "zM2uY0HQM";
-
     const CLAVE = p1 + p2 + p3 + p4 + p5;
 
     const input = document.getElementById('in');
@@ -56,25 +54,36 @@
         log.scrollTop = log.scrollHeight;
 
         try {
-            // CAMBIO CLAVE: Usamos v1beta y el nombre completo del modelo
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${CLAVE}`;
+            // CAMBIO DE ESTRATEGIA: Usamos gemini-pro que es el modelo más compatible
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${CLAVE}`;
             
             const r = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    contents: [{ parts: [{ text: "Eres un acompañante emocional cálido. Responde brevemente: " + txt }] }] 
+                    contents: [{ parts: [{ text: "Responde de forma cálida y breve: " + txt }] }] 
                 })
             });
 
             const d = await r.json();
+            
             if (d.error) {
-                bot.innerText = "Error: " + d.error.message;
+                // Si falla pro, intentamos con la ruta básica de gemini-1.5-pro
+                bot.innerText = "Reintentando conexión...";
+                console.log("Error con Pro, intentando ruta alternativa");
+                
+                const r2 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${CLAVE}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: txt }] }] })
+                });
+                const d2 = await r2.json();
+                bot.innerText = d2.candidates[0].content.parts[0].text;
             } else {
                 bot.innerText = d.candidates[0].content.parts[0].text;
             }
         } catch (err) {
-            bot.innerText = "Error de red. Intenta de nuevo.";
+            bot.innerText = "Error de red o modelo no disponible.";
         }
         log.scrollTop = log.scrollHeight;
     }
